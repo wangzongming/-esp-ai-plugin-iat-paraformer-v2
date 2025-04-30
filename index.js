@@ -8,7 +8,7 @@ module.exports = {
     type: "IAT", 
     main({ device_id, session_id, log, devLog, iat_config, iat_server, llm_server, tts_server, cb, iatServerErrorCb, logWSServer, logSendAudio, connectServerCb, connectServerBeforeCb, serverTimeOutCb, iatEndQueueCb }) {
         try {
-            const { api_key } = iat_config; 
+            const { api_key, vocabulary_id = "" } = iat_config; 
             if (!api_key) return log.error(`请配置阿里云esp-ai-plugin-iat-paraformer 的 api_key 参数。`);
     
             // 如果关闭后 message 还没有被关闭，需要定义一个标志控制
@@ -72,7 +72,8 @@ module.exports = {
                         model: 'paraformer-realtime-v2',
                         parameters: {
                             sample_rate: 16000,
-                            format: 'mp3'
+                            format: 'mp3',
+                            vocabulary_id
                         },
                         input: {}
                     }
