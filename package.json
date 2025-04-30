@@ -1,0 +1,19 @@
+{
+  "name": "esp-ai-plugin-iat-paraformer-v2",
+  "keywords": [
+    "esp-ai-plugin",
+    "esp-ai-plugin-iat",
+    "esp-ai-plugin-iat-paraformer-v2"
+  ],
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "author": "",
+  "license": "ISC"
+}
