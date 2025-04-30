@@ -7,7 +7,7 @@ paraformer-realtime-v2 文档： https://help.aliyun.com/zh/model-studio/websock
 # 安装
 在你的 `ESP-AI` 项目中执行下面命令
 ```bash
-esp-ai-plugin-iat-paraformer-v2
+npm i esp-ai-plugin-iat-paraformer-v2
 ```
 
 # 使用 
