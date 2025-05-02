@@ -19,6 +19,9 @@ module.exports = {
             if (vad_first < 3000) {
                 vad_first = 3000;
             }
+            if (vad_first > 10000) {
+                vad_first = 10000;
+            }
             if (vad_course < 500) {
                 vad_course = 500;
             }
