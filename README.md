@@ -22,6 +22,10 @@ espAi({
     iat_config: { 
         // https://help.aliyun.com/zh/model-studio/get-api-key?spm=a2c4g.11186623.0.0.2de054e0qf2WWm
         api_key: "sk-xxx",
+        vad_first: 10000, // 未说话前等待说话的静默时间 
+        vad_course: 800, // 说话后等待的静默时间
+        vocabulary_id: "", // 热词id 
+        // language_hints: [] // 语音，默认自动识别，可选项： zh: 中文  en: 英文  ja: 日语  yue: 粤语  ko: 韩语 
     },
 
     
