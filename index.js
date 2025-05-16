@@ -1,12 +1,14 @@
 const WebSocket = require('ws');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
 module.exports = {
     // 插件名字
     name: "esp-ai-plugin-iat-paraformer-v2",
     // 插件类型 LLM | TTS | IAT
     type: "IAT",
-    main({ device_id, session_id, log, devLog, iat_config, iat_server, llm_server, tts_server, cb, iatServerErrorCb, logWSServer, logSendAudio, connectServerCb, connectServerBeforeCb, serverTimeOutCb, iatEndQueueCb }) {
+    main({ device_id, session_id, log, devLog, iat_config, onIATText, cb, iatServerErrorCb, logWSServer, logSendAudio, connectServerCb, connectServerBeforeCb, serverTimeOutCb, iatEndQueueCb }) {
         try {
             let {
                 api_key,
@@ -51,12 +53,12 @@ module.exports = {
             // 注册WebSocket服务器操作
             logWSServer({
                 close: () => {
+                    sendFinishTask();
                     shouldClose = true;
                     iat_server_connected = false;
                     iat_ws.close();
                 },
-                end: () => {
-                    if (shouldClose) return;
+                end: () => { 
                     sendFinishTask();
                 }
             });
@@ -73,7 +75,6 @@ module.exports = {
                 if (shouldClose) return;
                 sendFinishTask();
             });
-
             // 发送run-task指令
             function sendRunTask() {
                 const runTaskMessage = {
@@ -92,7 +93,7 @@ module.exports = {
                             format: 'mp3',
                             vocabulary_id,
                             language_hints, // zh: 中文  en: 英文  ja: 日语  yue: 粤语  ko: 韩语 
-                            max_sentence_silence: vad_course
+                            max_sentence_silence: vad_course,
                         },
                         input: {}
                     }
@@ -101,7 +102,7 @@ module.exports = {
             }
 
             // 发送finish-task指令
-            function sendFinishTask() {
+            function sendFinishTask() { 
                 const finishTaskMessage = {
                     header: {
                         action: 'finish-task',
@@ -135,7 +136,8 @@ module.exports = {
 
                         break;
                     case 'result-generated':
-                        realStr = message.payload.output.sentence.text;
+                        realStr = message.payload.output.sentence.text; 
+                        onIATText(realStr);
                         if (realStr) {
                             tasked = true;
                         }
@@ -144,6 +146,7 @@ module.exports = {
                         devLog && log.iat_info(`->  IAT 最终结果：${realStr}`);
                         cb({ text: realStr, device_id });
                         connectServerCb(false);
+                        onIATText(realStr);
                         shouldClose = true;
                         iat_server_connected = false;
                         break;
@@ -174,11 +177,15 @@ module.exports = {
                 connectServerCb(false);
             });
 
+
+            let writeStreamMP3 = fs.createWriteStream(path.join(__dirname, `./pcm_output.mp3`));
             // 发送音频数据
             function send_pcm(data) {
                 if (shouldClose) return;
                 if (!iat_server_connected) return;
                 iat_ws.send(data);
+
+                writeStreamMP3.write(data);
             }
 
             logSendAudio(send_pcm);
