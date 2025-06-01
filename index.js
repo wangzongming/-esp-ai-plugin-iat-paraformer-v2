@@ -13,7 +13,7 @@ module.exports = {
             let {
                 api_key,
                 vad_first = 10000,
-                vad_course = 800,
+                vad_course = 5000,
                 vocabulary_id = "",
                 language_hints = null
             } = iat_config;
@@ -58,7 +58,7 @@ module.exports = {
                     iat_server_connected = false;
                     iat_ws.close();
                 },
-                end: () => { 
+                end: () => {
                     sendFinishTask();
                 }
             });
@@ -89,8 +89,8 @@ module.exports = {
                         function: 'recognition',
                         model: 'paraformer-realtime-v2',
                         parameters: {
-                            sample_rate: 16000,
-                            format: 'mp3',
+                            sample_rate: 16000, 
+                            format: 'pcm',
                             vocabulary_id,
                             language_hints, // zh: 中文  en: 英文  ja: 日语  yue: 粤语  ko: 韩语 
                             max_sentence_silence: vad_course,
@@ -102,7 +102,7 @@ module.exports = {
             }
 
             // 发送finish-task指令
-            function sendFinishTask() { 
+            function sendFinishTask() {
                 const finishTaskMessage = {
                     header: {
                         action: 'finish-task',
@@ -136,8 +136,8 @@ module.exports = {
 
                         break;
                     case 'result-generated':
-                        realStr = message.payload.output.sentence.text; 
-                        onIATText(realStr);
+                        realStr = message.payload.output.sentence.text;
+                        onIATText && onIATText(realStr);
                         if (realStr) {
                             tasked = true;
                         }
@@ -146,7 +146,7 @@ module.exports = {
                         devLog && log.iat_info(`->  IAT 最终结果：${realStr}`);
                         cb({ text: realStr, device_id });
                         connectServerCb(false);
-                        onIATText(realStr);
+                        onIATText && onIATText(realStr);
                         shouldClose = true;
                         iat_server_connected = false;
                         break;
@@ -177,15 +177,16 @@ module.exports = {
                 connectServerCb(false);
             });
 
-
-            let writeStreamMP3 = fs.createWriteStream(path.join(__dirname, `./pcm_output.mp3`));
+            // test...
+            // let writeStreamMP3 = fs.createWriteStream(path.join(__dirname, `./pcm_output.opus`));
             // 发送音频数据
             function send_pcm(data) {
                 if (shouldClose) return;
-                if (!iat_server_connected) return;
+                if (!iat_server_connected) return; 
                 iat_ws.send(data);
-
-                writeStreamMP3.write(data);
+                // console.log('收到音频：', data.length)
+                // test...
+                // writeStreamMP3.write(data);
             }
 
             logSendAudio(send_pcm);
