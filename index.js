@@ -52,7 +52,7 @@ module.exports = {
 
             // 注册WebSocket服务器操作
             logWSServer({
-                close: () => {
+                close: () => { 
                     sendFinishTask();
                     shouldClose = true;
                     iat_server_connected = false;
@@ -125,8 +125,7 @@ module.exports = {
                 switch (message.header.event) {
                     case 'task-started':
                         iat_server_connected = true;
-                        connectServerCb(true);
-
+                        connectServerCb(true); 
                         setTimeout(() => {
                             if (!tasked && iat_ws.OPEN) {
                                 // 结束任务
@@ -182,8 +181,8 @@ module.exports = {
             // 发送音频数据
             function send_pcm(data) {
                 if (shouldClose) return;
-                if (!iat_server_connected) return; 
-                iat_ws.send(data);
+                if (!iat_server_connected) return;  
+                data.length && iat_ws.send(data);
                 // console.log('收到音频：', data.length)
                 // test...
                 // writeStreamMP3.write(data);
