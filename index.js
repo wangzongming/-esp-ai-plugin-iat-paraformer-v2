@@ -8,7 +8,7 @@ module.exports = {
     name: "esp-ai-plugin-iat-paraformer-v2",
     // 插件类型 LLM | TTS | IAT
     type: "IAT",
-    main({ device_id, session_id, log, devLog, iat_config, onIATText, cb, iatServerErrorCb, logWSServer, logSendAudio, connectServerCb, connectServerBeforeCb, serverTimeOutCb, iatEndQueueCb }) {
+    main({ device_id, session_id, log, devLog, iat_config, onIATText, cb, iatServerErrorCb, logWSServer, logSendAudio, connectServerCb, connectServerBeforeCb, serverTimeOutCb, iatEndQueueCb, getClientAudioConfig = ()=> ({}) }) {
         try {
             let {
                 api_key,
@@ -34,7 +34,8 @@ module.exports = {
             let iat_server_connected = false;
             // 是否已经说过话了
             let tasked = false;
-
+            const { sample_rate = 16000, format = "pcm", language = "" } = getClientAudioConfig("esp-ai-plugin-iat-paraformer-v2");
+ 
             // 连接服务器前的回调
             connectServerBeforeCb();
 
@@ -89,15 +90,18 @@ module.exports = {
                         function: 'recognition',
                         model: 'paraformer-realtime-v2',
                         parameters: {
-                            sample_rate: 16000, 
-                            format: 'pcm',
-                            vocabulary_id,
+                            sample_rate: sample_rate, 
+                            format: format,
+                            vocabulary_id, 
                             language_hints, // zh: 中文  en: 英文  ja: 日语  yue: 粤语  ko: 韩语 
                             max_sentence_silence: vad_course,
                         },
                         input: {}
                     }
                 };
+                if(language){
+                    runTaskMessage.payload.parameters.language_hints = [language];
+                }
                 iat_ws.send(JSON.stringify(runTaskMessage));
             }
 
