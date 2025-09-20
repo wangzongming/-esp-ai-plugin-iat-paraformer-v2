@@ -35,7 +35,7 @@ module.exports = {
             // 是否已经说过话了
             let tasked = false;
             const { sample_rate = 16000, format = "pcm", language = "" } = getClientAudioConfig("esp-ai-plugin-iat-paraformer-v2");
- 
+            // console.log("format", format); 
             // 连接服务器前的回调
             connectServerBeforeCb();
 
@@ -91,7 +91,7 @@ module.exports = {
                         model: 'paraformer-realtime-v2',
                         parameters: {
                             sample_rate: sample_rate, 
-                            format: format,
+                            format: format, 
                             vocabulary_id, 
                             language_hints, // zh: 中文  en: 英文  ja: 日语  yue: 粤语  ko: 韩语 
                             max_sentence_silence: vad_course,
@@ -102,7 +102,7 @@ module.exports = {
                 if(language){
                     runTaskMessage.payload.parameters.language_hints = [language];
                 }
-                iat_ws.send(JSON.stringify(runTaskMessage));
+                iat_ws.OPEN &&  iat_ws.readyState === 1 && iat_ws.send(JSON.stringify(runTaskMessage));
             }
 
             // 发送finish-task指令
@@ -117,7 +117,7 @@ module.exports = {
                         input: {}
                     }
                 };
-                iat_ws.send(JSON.stringify(finishTaskMessage));
+                iat_ws.OPEN &&  iat_ws.readyState === 1 && iat_ws.send(JSON.stringify(finishTaskMessage));
             }
 
             let realStr = "";
@@ -181,13 +181,14 @@ module.exports = {
             });
 
             // test...
-            // let writeStreamMP3 = fs.createWriteStream(path.join(__dirname, `./pcm_output.opus`));
+            // let writeStreamMP3 = fs.createWriteStream(path.join(__dirname, `./pcm_output5.pcm`));
+            // let writeStreamMP3 = fs.createWriteStream(path.join(__dirname, `./pcm_output6.spx`));
             // 发送音频数据
             function send_pcm(data) {
                 if (shouldClose) return;
                 if (!iat_server_connected) return;  
                 data.length && iat_ws.send(data);
-                // console.log('收到音频：', data.length)
+                // console.log('收到音频：', `${new Date().getSeconds()}:${new Date().getMilliseconds()} `, data.length, data)
                 // test...
                 // writeStreamMP3.write(data);
             }
